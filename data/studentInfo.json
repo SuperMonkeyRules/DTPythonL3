@@ -1,0 +1,48 @@
+{
+  "students": [
+    {
+      "id": 0,
+      "name": "Alice Johnson"
+    },
+    {
+      "id": 1,
+      "name": "Bob Smith"
+    },
+    {
+      "id": 2,
+      "name": "Charlie Brown"
+    },
+    {
+      "id": 3,
+      "name": "Dana White"
+    },
+    {
+      "id": 4,
+      "name": "Eve Black"
+    },
+    {
+      "id": 5,
+      "name": "Frank Green"
+    },
+    {
+      "id": 6,
+      "name": "Grace Blue"
+    },
+    {
+      "id": 7,
+      "name": "Hank Purple"
+    },
+    {
+      "id": 8,
+      "name": "Ivy Pink"
+    },
+    {
+      "id": 9,
+      "name": "Jack Gray"
+    },
+    {
+      "id": 10,
+      "name": "Kelly Orange"
+    }
+  ]
+}

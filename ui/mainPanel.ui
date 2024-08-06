@@ -33,17 +33,27 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="viewPaperBTN">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>150</y>
+      <x>190</x>
+      <y>70</y>
       <width>111</width>
-      <height>41</height>
+      <height>30</height>
      </rect>
     </property>
     <property name="text">
-     <string>PushButton</string>
+     <string>View Paper</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="paperCOMBO">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>75</y>
+      <width>160</width>
+      <height>20</height>
+     </rect>
     </property>
    </widget>
   </widget>

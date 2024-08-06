@@ -1,0 +1,29 @@
+{
+  "papers": [
+    {
+      "id": 0,
+      "name": "compx1",
+      "title": "A Comprehensive Study on Machine Learning Algorithms"
+    },
+    {
+      "id": 1,
+      "name": "compx2",
+      "title": "Advancements in Quantum Computing"
+    },
+    {
+      "id": 2,
+      "name": "compx3",
+      "title": "Blockchain Technology and Its Applications"
+    },
+    {
+      "id": 3,
+      "name": "compx4",
+      "title": "The Impact of Artificial Intelligence on Healthcare"
+    },
+    {
+      "id": 4,
+      "name": "compx5",
+      "title": "Cybersecurity Threats and Defense Mechanisms"
+    }
+  ]
+}
