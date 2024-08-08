@@ -4,7 +4,8 @@ import json
 
 from PyQt6 import uic
 from PyQt6.QtCore import QAbstractTableModel, Qt
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QTableView
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QTableView, QTableWidgetItem, QTableWidget, \
+    QAbstractItemView
 
 activeTeacher = None
 
@@ -24,28 +25,16 @@ def getActiveTeacher():
     return activeTeacher
 
 
-class TableModel(QAbstractTableModel):
-    def __init__(self, data):
-        super(TableModel, self).__init__()
-        self._data = data
-
-    def data(self, index, role):
-        if role == Qt.ItemDataRole.DisplayRole:
-            return self._data[index.row()][index.column()]
-
-    def rowCount(self, index):
-        return len(self._data)
-
-    def columnCount(self, index):
-        return len(self._data[0])
-
-
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         self.ui = uic.loadUi('ui/mainPanel.ui', self)
         self.ui.activeTeachLABEL.setText(f'Teacher: {getActiveTeacher()}')
+
         self.ui.viewPaperBTN.clicked.connect(lambda: self.viewPapers())
+        self.ui.createStudentBTN.clicked.connect(lambda: self.viewPapers())
+        self.ui.createPaperBTN.clicked.connect(lambda: self.viewPapers())
+
         with open('data/paperInfo.json', 'r') as paperJSON:
             data = dict(json.load(paperJSON))
 
@@ -63,10 +52,13 @@ class PaperWindow(QMainWindow):
         QMainWindow.__init__(self, parent)
         self.ui = uic.loadUi('ui/paperPanel.ui', self)
         self.chosenPaper = chosenPaper
+        self.ui.gradeTABLE.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.populateTable()
+        self.ui.refreshBTN.clicked.connect(lambda: self.populateTable())
 
     def populateTable(self):
-        print(self.chosenPaper)
+        self.ui.gradeTABLE.clear()
+        self.ui.gradeTABLE.setHorizontalHeaderLabels(['name', 'grade'])
 
         with open('data/gradesInfo.json', 'r') as gradesJSON:
             gradesData = dict(json.load(gradesJSON))
@@ -86,19 +78,27 @@ class PaperWindow(QMainWindow):
             if grade['paper_id'] == selID:
                 for student in studentData['students']:
                     if student['id'] == grade['student_id']:
-                        print('Found student')
                         studentName = student['name']
-                        print(studentName)
                         try:
                             gradeData.append([studentName, grade['grade']])
                         except UnboundLocalError:
-                            print(student)
+                            pass
                         break
 
+        self.ui.gradeTABLE.setRowCount(len(gradeData))
+        row = 0
+        for studentGrade in gradeData:
+            col = 0
+            for info in studentGrade:
+                newItem = QTableWidgetItem(info)
+                newItem.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.ui.gradeTABLE.setItem(row, col, newItem)
+                col += 1
+            row += 1
 
-        print(gradeData)
-        self.model = TableModel(gradeData)
-        self.ui.paperVIEW.setModel(self.model)
+        self.ui.gradeTABLE.setColumnWidth(0, int(self.ui.gradeTABLE.width() / 2))
+        self.ui.gradeTABLE.resizeColumnToContents(1)
+        self.ui.gradeTABLE.resizeRowsToContents()
 
 
 class LoginWindow(QMainWindow):
