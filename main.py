@@ -31,9 +31,13 @@ class MainWindow(QMainWindow):
         self.ui = uic.loadUi('ui/mainPanel.ui', self)
         self.ui.activeTeachLABEL.setText(f'Teacher: {getActiveTeacher()}')
 
+        def createNew(creationType: str):
+            creationType = creationWindow(creationType)
+            creationType.show()
+
         self.ui.viewPaperBTN.clicked.connect(lambda: self.viewPapers())
-        self.ui.createStudentBTN.clicked.connect(lambda: self.viewPapers())
-        self.ui.createPaperBTN.clicked.connect(lambda: self.viewPapers())
+        self.ui.createStudentBTN.clicked.connect(lambda: createNew('student'))
+        self.ui.createPaperBTN.clicked.connect(lambda: createNew('paper'))
 
         with open('data/paperInfo.json', 'r') as paperJSON:
             data = dict(json.load(paperJSON))
@@ -51,8 +55,16 @@ class PaperWindow(QMainWindow):
     def __init__(self, parent, chosenPaper):
         QMainWindow.__init__(self, parent)
         self.ui = uic.loadUi('ui/paperPanel.ui', self)
-        self.chosenPaper = chosenPaper
         self.ui.gradeTABLE.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+
+        self.chosenPaper = chosenPaper
+        with open('data/paperInfo.json', 'r') as paperJSON:
+            paperData = dict(json.load(paperJSON))
+
+        for paper in paperData['papers']:
+            if paper['name'] == self.chosenPaper:
+                self.ui.paperLABEL.setText(f'{paper["name"]} - {paper["title"]}')
+
         self.populateTable()
         self.ui.refreshBTN.clicked.connect(lambda: self.populateTable())
 
@@ -99,6 +111,13 @@ class PaperWindow(QMainWindow):
         self.ui.gradeTABLE.setColumnWidth(0, int(self.ui.gradeTABLE.width() / 2))
         self.ui.gradeTABLE.resizeColumnToContents(1)
         self.ui.gradeTABLE.resizeRowsToContents()
+
+
+class creationWindow(QMainWindow):
+    def __init__(self, target: str, parent=None):
+        QMainWindow.__init__(self, parent)
+        self.ui = uic.loadUi('ui/creationPopup.ui', self)
+        print(target)
 
 
 class LoginWindow(QMainWindow):

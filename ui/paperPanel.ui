@@ -31,9 +31,9 @@
     <property name="geometry">
      <rect>
       <x>45</x>
-      <y>71</y>
+      <y>91</y>
       <width>711</width>
-      <height>491</height>
+      <height>471</height>
      </rect>
     </property>
     <property name="showGrid">
@@ -57,6 +57,30 @@
     <row/>
     <column/>
     <column/>
+   </widget>
+   <widget class="QLabel" name="paperLABEL">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>40</y>
+      <width>701</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Paper Name</string>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
    </widget>
   </widget>
  </widget>
