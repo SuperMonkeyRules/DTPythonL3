@@ -5,7 +5,7 @@ import json
 from PyQt6 import uic
 from PyQt6.QtCore import QAbstractTableModel, Qt
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QTableView, QTableWidgetItem, QTableWidget, \
-    QAbstractItemView
+    QAbstractItemView, QDialog, QDialogButtonBox, QLineEdit
 
 activeTeacher = None
 
@@ -35,9 +35,15 @@ class MainWindow(QMainWindow):
             creationType = creationWindow(creationType)
             creationType.show()
 
+        def viewAllStudents():
+            studentViewWindow = StudentWindow()
+            studentViewWindow.show()
+            print('Showing students')
+
         self.ui.viewPaperBTN.clicked.connect(lambda: self.viewPapers())
         self.ui.createStudentBTN.clicked.connect(lambda: createNew('student'))
         self.ui.createPaperBTN.clicked.connect(lambda: createNew('paper'))
+        self.ui.viewStudentsBTN.clicked.connect(lambda: viewAllStudents())
 
         with open('data/paperInfo.json', 'r') as paperJSON:
             data = dict(json.load(paperJSON))
@@ -49,6 +55,53 @@ class MainWindow(QMainWindow):
         selectedPaper = self.ui.paperCOMBO.currentText()
         paperPanel = PaperWindow(self, selectedPaper)
         paperPanel.show()
+
+
+class StudentWindow(QMainWindow):
+    def __init__(self, parent=None):
+        QMainWindow.__init__(self, parent)
+        self.ui = uic.loadUi('ui/studentPanel.ui', self)
+        self.ui.gradeTABLE.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+
+        self.populateTable()
+        self.ui.refreshBTN.clicked.connect(lambda: self.populateTable())
+
+    def populateTable(self):
+        self.ui.gradeTABLE.clear()
+        self.ui.gradeTABLE.setHorizontalHeaderLabels(['name', 'papers'])
+
+        with open('data/gradesInfo.json', 'r') as gradesJSON:
+            gradesData = dict(json.load(gradesJSON))
+
+        with open('data/paperInfo.json', 'r') as paperJSON:
+            paperData = dict(json.load(paperJSON))
+
+        with open('data/studentInfo.json', 'r') as studentJSON:
+            studentData = dict(json.load(studentJSON))
+
+        studentDataDict = []
+        for student in studentData['students']:
+            print(student['name'])
+            for entry in gradesData['grades']:
+                if entry['student_id'] == student['id']:
+                    for paper in paperData['papers']:
+                        if entry['paper_id'] == paper['id']:
+                            print(paper['name'])
+
+        self.ui.gradeTABLE.setRowCount(len(studentData))
+        row = 0
+        for studentGrade in studentData:
+            col = 0
+            for info in studentGrade:
+                newItem = QTableWidgetItem(info)
+                newItem.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.ui.gradeTABLE.setItem(row, col, newItem)
+                col += 1
+            row += 1
+
+        self.ui.gradeTABLE.setColumnWidth(0, int(self.ui.gradeTABLE.width() / 2))
+        self.ui.gradeTABLE.resizeColumnToContents(1)
+        self.ui.gradeTABLE.resizeRowsToContents()
 
 
 class PaperWindow(QMainWindow):
@@ -113,11 +166,54 @@ class PaperWindow(QMainWindow):
         self.ui.gradeTABLE.resizeRowsToContents()
 
 
-class creationWindow(QMainWindow):
+class creationWindow(QDialog):
     def __init__(self, target: str, parent=None):
-        QMainWindow.__init__(self, parent)
+        QDialog.__init__(self, parent)
         self.ui = uic.loadUi('ui/creationPopup.ui', self)
-        print(target)
+        self.target = target
+        if self.target == 'student':
+            self.ui.descBOX.deleteLater()
+
+        self.ui.creationLABEL.setText(f'Create {self.target.capitalize()}')
+        self.ui.buttonBox.accepted.connect(lambda: self.acceptedCreation())
+
+    def acceptedCreation(self):
+        if self.target == 'paper':
+            with open('data/paperInfo.json', 'r') as readPaper:
+                data = dict(json.load(readPaper))
+            paperID = len(data['papers'])
+            paperName = self.ui.nameBOX.text()
+            paperDesc = self.ui.descBOX.text()
+            newPaper = {
+                "id": paperID,
+                "name": paperName,
+                "title": paperDesc
+            }
+            data['papers'].append(newPaper)
+
+            with open('data/paperInfo.json', 'w') as writePaper:
+                json.dump(data, writePaper, indent=2)
+
+            print('Created new paper')
+        elif self.target == 'student':
+            with open('data/studentInfo.json', 'r') as readStudent:
+                data = dict(json.load(readStudent))
+
+            studentID = len(data['papers'])
+            studentName = self.ui.nameBOX.text()
+            newStudent = {
+                "id": studentID,
+                "name": studentName,
+            }
+            data['papers'].append(newStudent)
+
+            with open('data/studentInfo.json', 'w') as writeStudent:
+                json.dump(data, writeStudent, indent=2)
+
+            print('Created new student')
+        else:
+            raise 'somethings very wrong'
+        pass
 
 
 class LoginWindow(QMainWindow):
