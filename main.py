@@ -61,14 +61,13 @@ class StudentWindow(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         self.ui = uic.loadUi('ui/studentPanel.ui', self)
-        self.ui.gradeTABLE.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.ui.studentTABLE.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
         self.populateTable()
         self.ui.refreshBTN.clicked.connect(lambda: self.populateTable())
 
     def populateTable(self):
-        self.ui.gradeTABLE.clear()
-        self.ui.gradeTABLE.setHorizontalHeaderLabels(['name', 'papers'])
+        self.ui.studentTABLE.clear()
 
         with open('data/gradesInfo.json', 'r') as gradesJSON:
             gradesData = dict(json.load(gradesJSON))
@@ -79,29 +78,36 @@ class StudentWindow(QMainWindow):
         with open('data/studentInfo.json', 'r') as studentJSON:
             studentData = dict(json.load(studentJSON))
 
-        studentDataDict = []
+        studentDataList = []
         for student in studentData['students']:
-            print(student['name'])
+            currentStudent = [student['name']]
+            currentPapers = []
             for entry in gradesData['grades']:
                 if entry['student_id'] == student['id']:
                     for paper in paperData['papers']:
                         if entry['paper_id'] == paper['id']:
-                            print(paper['name'])
+                            currentPapers.append(paper['name'])
+            currentStudent.append(currentPapers)
+            studentDataList.append(currentStudent)
+        print(studentDataList)
 
-        self.ui.gradeTABLE.setRowCount(len(studentData))
+        self.ui.studentTABLE.setRowCount(len(studentDataList))
         row = 0
-        for studentGrade in studentData:
+        for studentGrade in studentDataList:
             col = 0
             for info in studentGrade:
-                newItem = QTableWidgetItem(info)
+                try:
+                    newItem = QTableWidgetItem(info)
+                except TypeError:
+                    newItem = QTableWidgetItem(', '.join(info).upper())
                 newItem.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                self.ui.gradeTABLE.setItem(row, col, newItem)
+                self.ui.studentTABLE.setItem(row, col, newItem)
                 col += 1
             row += 1
 
-        self.ui.gradeTABLE.setColumnWidth(0, int(self.ui.gradeTABLE.width() / 2))
-        self.ui.gradeTABLE.resizeColumnToContents(1)
-        self.ui.gradeTABLE.resizeRowsToContents()
+        self.ui.studentTABLE.setColumnWidth(0, int(self.ui.studentTABLE.width() / 2))
+        self.ui.studentTABLE.resizeColumnToContents(1)
+        self.ui.studentTABLE.resizeRowsToContents()
 
 
 class PaperWindow(QMainWindow):
@@ -123,7 +129,6 @@ class PaperWindow(QMainWindow):
 
     def populateTable(self):
         self.ui.gradeTABLE.clear()
-        self.ui.gradeTABLE.setHorizontalHeaderLabels(['name', 'grade'])
 
         with open('data/gradesInfo.json', 'r') as gradesJSON:
             gradesData = dict(json.load(gradesJSON))
@@ -139,7 +144,7 @@ class PaperWindow(QMainWindow):
             for paper in paperData['papers']:
                 if paper['name'] == self.chosenPaper:
                     selID = paper['id']
-                break
+                    break
             if grade['paper_id'] == selID:
                 for student in studentData['students']:
                     if student['id'] == grade['student_id']:
@@ -199,13 +204,14 @@ class creationWindow(QDialog):
             with open('data/studentInfo.json', 'r') as readStudent:
                 data = dict(json.load(readStudent))
 
-            studentID = len(data['papers'])
+            print(data)
+            studentID = len(data['students'])
             studentName = self.ui.nameBOX.text()
             newStudent = {
                 "id": studentID,
                 "name": studentName,
             }
-            data['papers'].append(newStudent)
+            data['students'].append(newStudent)
 
             with open('data/studentInfo.json', 'w') as writeStudent:
                 json.dump(data, writeStudent, indent=2)
@@ -230,14 +236,16 @@ class LoginWindow(QMainWindow):
         loginPass = self.ui.passwordINPUT.text()
         hashedPass = hashText(loginPass)
         try:
-            if data[loginTeach] == hashedPass:
-                print('Correct password')
-                setActiveTeacher(loginTeach)
-                mainPanel = MainWindow()
-                mainPanel.show()
-                self.close()
-            else:
-                print('Incorrect password')
+            for teacher in data['teachers']:
+                if teacher['name'] == loginTeach:  # NAMES ARE TREATED AS UNIQUE
+                    if teacher['password'] == hashedPass:
+                        print('Correct password')
+                        setActiveTeacher(loginTeach)
+                        mainPanel = MainWindow()
+                        mainPanel.show()
+                        self.close()
+                    else:
+                        print('Incorrect password')
         except KeyError:
             print('User does not exist')
 

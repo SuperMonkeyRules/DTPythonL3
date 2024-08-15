@@ -27,7 +27,7 @@
      <string>Refresh</string>
     </property>
    </widget>
-   <widget class="QTableWidget" name="gradeTABLE">
+   <widget class="QTableWidget" name="studentTABLE">
     <property name="geometry">
      <rect>
       <x>45</x>
@@ -45,6 +45,9 @@
     <property name="columnCount">
      <number>2</number>
     </property>
+    <attribute name="horizontalHeaderVisible">
+     <bool>true</bool>
+    </attribute>
     <attribute name="horizontalHeaderCascadingSectionResizes">
      <bool>true</bool>
     </attribute>
@@ -54,9 +57,20 @@
     <attribute name="horizontalHeaderStretchLastSection">
      <bool>true</bool>
     </attribute>
+    <attribute name="verticalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
     <row/>
-    <column/>
-    <column/>
+    <column>
+     <property name="text">
+      <string>NAME</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>PAPERS</string>
+     </property>
+    </column>
    </widget>
    <widget class="QLabel" name="paperLABEL">
     <property name="geometry">
