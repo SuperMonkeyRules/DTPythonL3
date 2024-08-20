@@ -43,7 +43,7 @@
      <number>1</number>
     </property>
     <property name="columnCount">
-     <number>2</number>
+     <number>3</number>
     </property>
     <attribute name="horizontalHeaderCascadingSectionResizes">
      <bool>true</bool>
@@ -66,6 +66,11 @@
     <column>
      <property name="text">
       <string>GRADE</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>MARKED BY</string>
      </property>
     </column>
    </widget>

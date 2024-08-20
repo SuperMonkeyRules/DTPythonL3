@@ -44,6 +44,7 @@ class MainWindow(QMainWindow):
         self.ui.createStudentBTN.clicked.connect(lambda: createNew('student'))
         self.ui.createPaperBTN.clicked.connect(lambda: createNew('paper'))
         self.ui.viewStudentsBTN.clicked.connect(lambda: viewAllStudents())
+        # self.ui.markStudentBTN.clicked.connect(lambda: )
 
         with open('data/paperInfo.json', 'r') as paperJSON:
             data = dict(json.load(paperJSON))
@@ -68,6 +69,7 @@ class StudentWindow(QMainWindow):
 
     def populateTable(self):
         self.ui.studentTABLE.clear()
+        self.ui.studentTABLE.setHorizontalHeaderLabels(['NAME', 'PAPERS'])
 
         with open('data/gradesInfo.json', 'r') as gradesJSON:
             gradesData = dict(json.load(gradesJSON))
@@ -129,6 +131,7 @@ class PaperWindow(QMainWindow):
 
     def populateTable(self):
         self.ui.gradeTABLE.clear()
+        self.ui.gradeTABLE.setHorizontalHeaderLabels(['NAME', 'GRADE', 'MARKED BY'])
 
         with open('data/gradesInfo.json', 'r') as gradesJSON:
             gradesData = dict(json.load(gradesJSON))
@@ -138,6 +141,9 @@ class PaperWindow(QMainWindow):
 
         with open('data/studentInfo.json', 'r') as studentJSON:
             studentData = dict(json.load(studentJSON))
+
+        with open('data/loginInfo.json', 'r') as teacherJSON:
+            teacherData = dict(json.load(teacherJSON))
 
         gradeData = []
         for grade in gradesData['grades']:
@@ -149,11 +155,15 @@ class PaperWindow(QMainWindow):
                 for student in studentData['students']:
                     if student['id'] == grade['student_id']:
                         studentName = student['name']
-                        try:
-                            gradeData.append([studentName, grade['grade']])
-                        except UnboundLocalError:
-                            pass
-                        break
+                for teacher in teacherData['teachers']:
+                    if teacher['id'] == grade['teacher_id']:
+                        teacherName = teacher['name']
+
+                try:
+                    gradeData.append([studentName, grade['grade'], teacherName])
+                except UnboundLocalError:
+                    pass
+                print(grade)
 
         self.ui.gradeTABLE.setRowCount(len(gradeData))
         row = 0
@@ -166,8 +176,9 @@ class PaperWindow(QMainWindow):
                 col += 1
             row += 1
 
-        self.ui.gradeTABLE.setColumnWidth(0, int(self.ui.gradeTABLE.width() / 2))
-        self.ui.gradeTABLE.resizeColumnToContents(1)
+        self.ui.gradeTABLE.setColumnWidth(0, int(self.ui.gradeTABLE.width() / 3))
+        self.ui.gradeTABLE.setColumnWidth(1, int(self.ui.gradeTABLE.width() / 3))
+        self.ui.gradeTABLE.resizeColumnToContents(2)
         self.ui.gradeTABLE.resizeRowsToContents()
 
 
