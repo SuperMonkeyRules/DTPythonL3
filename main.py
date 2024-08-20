@@ -10,22 +10,42 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QTable
 activeTeacher = None
 
 
-def hashText(text):
+def hashText(text: str):
+    """
+    Hashes the input text and returns a hexadecimal.
+
+    :param text: The text to be hashed.
+    :return: The hashed text as a hexadecimal string.
+    """
     hashObject = hashlib.sha256()
     hashObject.update(text.encode())
     return hashObject.hexdigest()
 
 
-def setActiveTeacher(teacher):
+def setActiveTeacher(teacher: str):
+    """
+    Sets the global variable activeTeacher to the specified teacher.
+
+    :param teacher: The teacher to set as active.
+    """
     global activeTeacher
     activeTeacher = teacher
 
 
 def getActiveTeacher():
+    """
+    Retrieves the current value of the global variable activeTeacher.
+
+    :return: The current active teacher.
+    """
     return activeTeacher
 
 
 class MainWindow(QMainWindow):
+    """
+    The main application window that manages the primary interface for
+    viewing and creating students, papers, and managing grades.
+    """
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         self.ui = uic.loadUi('ui/mainPanel.ui', self)
@@ -44,7 +64,7 @@ class MainWindow(QMainWindow):
         self.ui.createStudentBTN.clicked.connect(lambda: createNew('student'))
         self.ui.createPaperBTN.clicked.connect(lambda: createNew('paper'))
         self.ui.viewStudentsBTN.clicked.connect(lambda: viewAllStudents())
-        # self.ui.markStudentBTN.clicked.connect(lambda: )
+        self.ui.markStudentBTN.clicked.connect(lambda: gradeManager())
 
         with open('data/paperInfo.json', 'r') as paperJSON:
             data = dict(json.load(paperJSON))
@@ -53,12 +73,23 @@ class MainWindow(QMainWindow):
             self.ui.paperCOMBO.addItem(paper['name'])
 
     def viewPapers(self):
+        """
+        Opens a new PaperWindow to display information about the selected paper.
+        """
         selectedPaper = self.ui.paperCOMBO.currentText()
         paperPanel = PaperWindow(self, selectedPaper)
         paperPanel.show()
 
 
+class gradeManager(QMainWindow):
+    def __init__(self, parent=None):
+        QMainWindow.__init__(self, parent)
+
+
 class StudentWindow(QMainWindow):
+    """
+    Manages the student view window, displaying students and their current papers.
+    """
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         self.ui = uic.loadUi('ui/studentPanel.ui', self)
@@ -68,6 +99,9 @@ class StudentWindow(QMainWindow):
         self.ui.refreshBTN.clicked.connect(lambda: self.populateTable())
 
     def populateTable(self):
+        """
+        Populates the table with student names, their current papers.
+        """
         self.ui.studentTABLE.clear()
         self.ui.studentTABLE.setHorizontalHeaderLabels(['NAME', 'PAPERS'])
 
@@ -95,9 +129,9 @@ class StudentWindow(QMainWindow):
 
         self.ui.studentTABLE.setRowCount(len(studentDataList))
         row = 0
-        for studentGrade in studentDataList:
+        for singleStudentData in studentDataList:
             col = 0
-            for info in studentGrade:
+            for info in singleStudentData:
                 try:
                     newItem = QTableWidgetItem(info)
                 except TypeError:
@@ -113,6 +147,9 @@ class StudentWindow(QMainWindow):
 
 
 class PaperWindow(QMainWindow):
+    """
+    Manages the display of grades for a specific paper.
+    """
     def __init__(self, parent, chosenPaper):
         QMainWindow.__init__(self, parent)
         self.ui = uic.loadUi('ui/paperPanel.ui', self)
