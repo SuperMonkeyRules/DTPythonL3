@@ -60,11 +60,16 @@ class MainWindow(QMainWindow):
             studentViewWindow.show()
             print('Showing students')
 
+        def openGradeManager():
+            gradeManagementWindow = gradeManager()
+            gradeManagementWindow.show()
+            print('Opened grade manager')
+
         self.ui.viewPaperBTN.clicked.connect(lambda: self.viewPapers())
         self.ui.createStudentBTN.clicked.connect(lambda: createNew('student'))
         self.ui.createPaperBTN.clicked.connect(lambda: createNew('paper'))
         self.ui.viewStudentsBTN.clicked.connect(lambda: viewAllStudents())
-        self.ui.markStudentBTN.clicked.connect(lambda: gradeManager())
+        self.ui.markStudentBTN.clicked.connect(lambda: openGradeManager())
 
         with open('data/paperInfo.json', 'r') as paperJSON:
             data = dict(json.load(paperJSON))
@@ -84,6 +89,57 @@ class MainWindow(QMainWindow):
 class gradeManager(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
+        self.ui = uic.loadUi('ui/gradePanel.ui', self)
+        self.populateStudents()
+        self.populatePapers()
+        self.populateGrades()
+
+        self.ui.gradeSUBMIT.accepted.connect(lambda: self.submitGrade())
+        self.ui.gradeSUBMIT.rejected.connect(lambda: self.close())
+
+    def submitGrade(self):
+        with open('data/gradesInfo.json', 'r') as gradesJSON:
+            gradesData = dict(json.load(gradesJSON))
+
+        print(self.ui.studentCB.currentText())
+        print(self.ui.paperCB.currentText())
+        print(self.ui.gradeCB.currentText())
+        print('Current grade')
+        for gradeInfo in gradesData['grades']:
+            print(gradeInfo)
+
+
+
+    def populateStudents(self):
+        self.ui.studentCB.clear()
+
+        with open('data/studentInfo.json', 'r') as studentJSON:
+            studentData = dict(json.load(studentJSON))
+
+        for student in studentData['students']:
+            self.ui.studentCB.addItem(student['name'])
+
+    def populatePapers(self):
+        self.ui.paperCB.clear()
+
+        with open('data/paperInfo.json', 'r') as paperJSON:
+            paperData = dict(json.load(paperJSON))
+
+        for paper in paperData['papers']:
+            self.ui.paperCB.addItem(paper['name'])
+
+    def populateGrades(self):
+        self.ui.gradeCB.clear()
+        listOfGrades = ['A', 'B', 'C', 'D']
+
+        for grade in listOfGrades:
+            for i in range(0, 3):
+                if i == 0:
+                    self.ui.gradeCB.addItem(f'{grade}+')
+                if i == 1:
+                    self.ui.gradeCB.addItem(grade)
+                if i == 2:
+                    self.ui.gradeCB.addItem(f'{grade}-')
 
 
 class StudentWindow(QMainWindow):
