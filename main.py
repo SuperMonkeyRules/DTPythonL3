@@ -101,13 +101,41 @@ class gradeManager(QMainWindow):
         with open('data/gradesInfo.json', 'r') as gradesJSON:
             gradesData = dict(json.load(gradesJSON))
 
-        print(self.ui.studentCB.currentText())
-        print(self.ui.paperCB.currentText())
-        print(self.ui.gradeCB.currentText())
-        print('Current grade')
-        for gradeInfo in gradesData['grades']:
-            print(gradeInfo)
+        with open('data/loginInfo.json', 'r') as teacherJSON:
+            teacherData = dict(json.load(teacherJSON))
 
+        with open('data/paperInfo.json', 'r') as paperJSON:
+            paperData = dict(json.load(paperJSON))
+
+        with open('data/studentInfo.json', 'r') as studentJSON:
+            studentData = dict(json.load(studentJSON))
+
+
+        newGrade = self.ui.gradeCB.currentText()
+
+        for studentInfo in studentData['students']:
+            if studentInfo['name'] == self.ui.studentCB.currentText():
+                studentID = studentInfo['id']
+                break
+
+        for teacherInfo in teacherData['teachers']:
+            if teacherInfo['name'] == getActiveTeacher():
+                teacherID = teacherInfo['id']
+                break
+
+        for paperInfo in paperData['papers']:
+            if paperInfo['name'] == self.ui.paperCB.currentText():
+                paperID = paperInfo['id']
+                break
+
+        for gradeInfo in gradesData['grades']:
+            if gradeInfo['paper_id'] == paperID and gradeInfo['student_id'] == studentID:
+                gradeInfo['grade'] = newGrade
+                gradeInfo['teacher_id'] = teacherID
+                break
+
+        with open('data/gradesInfo.json', 'w') as writeGrades:
+            json.dump(gradesData, writeGrades, indent=2)
 
 
     def populateStudents(self):
