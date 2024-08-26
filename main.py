@@ -113,6 +113,7 @@ class gradeManager(QMainWindow):
 
         newGrade = self.ui.gradeCB.currentText()
 
+        # Convert all words to IDs
         for studentInfo in studentData['students']:
             if studentInfo['name'] == self.ui.studentCB.currentText():
                 studentID = studentInfo['id']
@@ -128,6 +129,7 @@ class gradeManager(QMainWindow):
                 paperID = paperInfo['id']
                 break
 
+        # Find the grade to be updated
         for gradeInfo in gradesData['grades']:
             if gradeInfo['paper_id'] == paperID and gradeInfo['student_id'] == studentID:
                 gradeInfo['grade'] = newGrade
