@@ -5,7 +5,7 @@ import json
 from PyQt6 import uic
 from PyQt6.QtCore import QAbstractTableModel, Qt
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QTableView, QTableWidgetItem, QTableWidget, \
-    QAbstractItemView, QDialog, QDialogButtonBox, QLineEdit
+    QAbstractItemView, QDialog, QDialogButtonBox, QLineEdit, QMessageBox
 
 activeTeacher = None
 
@@ -98,6 +98,7 @@ class gradeManager(QMainWindow):
         self.ui.gradeSUBMIT.rejected.connect(lambda: self.close())
 
     def submitGrade(self):
+        success = False
         with open('data/gradesInfo.json', 'r') as gradesJSON:
             gradesData = dict(json.load(gradesJSON))
 
@@ -129,15 +130,31 @@ class gradeManager(QMainWindow):
                 paperID = paperInfo['id']
                 break
 
+        changeType = ''
         # Find the grade to be updated
         for gradeInfo in gradesData['grades']:
             if gradeInfo['paper_id'] == paperID and gradeInfo['student_id'] == studentID:
                 gradeInfo['grade'] = newGrade
                 gradeInfo['teacher_id'] = teacherID
+                success = True
+                changeType = 'Updated'
                 break
+
+        if not success:
+            gradeInfo = {'student_id': studentID,
+                         'paper_id': paperID,
+                         'grade': newGrade,
+                         'teacher_id': teacherID}
+            gradesData['grades'].append(gradeInfo)
+            changeType = 'Added'
 
         with open('data/gradesInfo.json', 'w') as writeGrades:
             json.dump(gradesData, writeGrades, indent=2)
+
+        msg = QMessageBox()
+        msg.setText(f'Successfully {changeType}')
+        msg.setWindowTitle('Successful')
+        msg.exec()
 
 
     def populateStudents(self):
