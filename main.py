@@ -1,14 +1,13 @@
-import sys
 import hashlib
 import json
+import sys
 
 from PyQt6 import uic
-from PyQt6.QtCore import QAbstractTableModel, Qt
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QTableView, QTableWidgetItem, QTableWidget, \
-    QAbstractItemView, QDialog, QDialogButtonBox, QLineEdit, QMessageBox
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QAbstractItemView, QDialog, QMessageBox, \
+    QTableWidget
 
 activeTeacher = None
-
 
 def hashText(text: str):
     """
@@ -52,18 +51,28 @@ class MainWindow(QMainWindow):
         self.ui.activeTeachLABEL.setText(f'Teacher: {getActiveTeacher()}')
 
         def createNew(creationType: str):
+            """
+            Creates the student/paper creation window.
+
+            :param creationType:
+            """
             creationType = creationWindow(creationType)
             creationType.show()
 
         def viewAllStudents():
+            """
+            Opens the student viewer.
+            """
             studentViewWindow = StudentWindow()
             studentViewWindow.show()
-            print('Showing students')
 
         def openGradeManager():
+            """
+            Opens the grade manager.
+            """
             gradeManagementWindow = gradeManager()
             gradeManagementWindow.show()
-            print('Opened grade manager')
+
 
         self.ui.viewPaperBTN.clicked.connect(lambda: self.viewPapers())
         self.ui.createStudentBTN.clicked.connect(lambda: createNew('student'))
@@ -71,9 +80,11 @@ class MainWindow(QMainWindow):
         self.ui.viewStudentsBTN.clicked.connect(lambda: viewAllStudents())
         self.ui.markStudentBTN.clicked.connect(lambda: openGradeManager())
 
+        # Get all papers
         with open('data/paperInfo.json', 'r') as paperJSON:
             data = dict(json.load(paperJSON))
 
+        # Populate dropdown with papers
         for paper in data['papers']:
             self.ui.paperCOMBO.addItem(paper['name'])
 
@@ -87,6 +98,9 @@ class MainWindow(QMainWindow):
 
 
 class gradeManager(QMainWindow):
+    """
+
+    """
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         self.ui = uic.loadUi('ui/gradePanel.ui', self)
@@ -98,7 +112,12 @@ class gradeManager(QMainWindow):
         self.ui.gradeSUBMIT.rejected.connect(lambda: self.close())
 
     def submitGrade(self):
+        """
+        Grade submitter.
+        Update or Add new grade.
+        """
         success = False
+        # Open all files
         with open('data/gradesInfo.json', 'r') as gradesJSON:
             gradesData = dict(json.load(gradesJSON))
 
@@ -110,7 +129,6 @@ class gradeManager(QMainWindow):
 
         with open('data/studentInfo.json', 'r') as studentJSON:
             studentData = dict(json.load(studentJSON))
-
 
         newGrade = self.ui.gradeCB.currentText()
 
@@ -140,6 +158,7 @@ class gradeManager(QMainWindow):
                 changeType = 'Updated'
                 break
 
+        # If it wasn't updated add it
         if not success:
             gradeInfo = {'student_id': studentID,
                          'paper_id': paperID,
@@ -158,6 +177,9 @@ class gradeManager(QMainWindow):
 
 
     def populateStudents(self):
+        """
+        Fill student dropdown
+        """
         self.ui.studentCB.clear()
 
         with open('data/studentInfo.json', 'r') as studentJSON:
@@ -167,6 +189,9 @@ class gradeManager(QMainWindow):
             self.ui.studentCB.addItem(student['name'])
 
     def populatePapers(self):
+        """
+        Fill paper dropdown
+        """
         self.ui.paperCB.clear()
 
         with open('data/paperInfo.json', 'r') as paperJSON:
@@ -176,6 +201,9 @@ class gradeManager(QMainWindow):
             self.ui.paperCB.addItem(paper['name'])
 
     def populateGrades(self):
+        """
+        Fill grade dropdown
+        """
         self.ui.gradeCB.clear()
         listOfGrades = ['A', 'B', 'C', 'D']
 
@@ -228,7 +256,6 @@ class StudentWindow(QMainWindow):
                             currentPapers.append(paper['name'])
             currentStudent.append(currentPapers)
             studentDataList.append(currentStudent)
-        print(studentDataList)
 
         self.ui.studentTABLE.setRowCount(len(studentDataList))
         row = 0
@@ -270,6 +297,9 @@ class PaperWindow(QMainWindow):
         self.ui.refreshBTN.clicked.connect(lambda: self.populateTable())
 
     def populateTable(self):
+        """
+        Fill grades table
+        """
         self.ui.gradeTABLE.clear()
         self.ui.gradeTABLE.setHorizontalHeaderLabels(['NAME', 'GRADE', 'MARKED BY'])
 
@@ -303,7 +333,6 @@ class PaperWindow(QMainWindow):
                     gradeData.append([studentName, grade['grade'], teacherName])
                 except UnboundLocalError:
                     pass
-                print(grade)
 
         self.ui.gradeTABLE.setRowCount(len(gradeData))
         row = 0
@@ -323,6 +352,9 @@ class PaperWindow(QMainWindow):
 
 
 class creationWindow(QDialog):
+    """
+    Paper/Student creation window
+    """
     def __init__(self, target: str, parent=None):
         QDialog.__init__(self, parent)
         self.ui = uic.loadUi('ui/creationPopup.ui', self)
@@ -334,6 +366,10 @@ class creationWindow(QDialog):
         self.ui.buttonBox.accepted.connect(lambda: self.acceptedCreation())
 
     def acceptedCreation(self):
+        """
+        Create new paper or student.
+        Write out to persistent storage.
+        """
         if self.target == 'paper':
             with open('data/paperInfo.json', 'r') as readPaper:
                 data = dict(json.load(readPaper))
