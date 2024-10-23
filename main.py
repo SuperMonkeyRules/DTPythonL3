@@ -3,9 +3,9 @@ import json
 import sys
 
 from PyQt6 import uic
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QRect, QPoint
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QAbstractItemView, QDialog, QMessageBox, \
-    QTableWidget
+    QLineEdit, QMessageBox, QLabel
 
 activeTeacher = None
 
@@ -38,6 +38,18 @@ def getActiveTeacher():
     :return: The current active teacher.
     """
     return activeTeacher
+
+class messageBox(QMessageBox):
+    """
+    An easily adjustable message box.
+    :param title: Title of the message box
+    :param text: Text of the message box
+    """
+    def __init__(self, title, text):
+        QMessageBox.__init__(self)
+        self.setStyleSheet("QLabel{min-width: 150px;}")
+        self.setWindowTitle(title)
+        self.setText(text)
 
 
 class MainWindow(QMainWindow):
@@ -370,6 +382,11 @@ class creationWindow(QDialog):
         Create new paper or student.
         Write out to persistent storage.
         """
+
+        if not self.ui.nameBOX.text() or not self.ui.descBOX.text():
+            messageBox('Creation Status', 'Failed to create entry').exec()
+            return
+
         if self.target == 'paper':
             with open('data/paperInfo.json', 'r') as readPaper:
                 data = dict(json.load(readPaper))
@@ -386,12 +403,11 @@ class creationWindow(QDialog):
             with open('data/paperInfo.json', 'w') as writePaper:
                 json.dump(data, writePaper, indent=2)
 
-            print('Created new paper')
+            messageBox('Creation Status', f'Created new paper\n{paperName}').exec()
         elif self.target == 'student':
             with open('data/studentInfo.json', 'r') as readStudent:
                 data = dict(json.load(readStudent))
 
-            print(data)
             studentID = len(data['students'])
             studentName = self.ui.nameBOX.text()
             newStudent = {
@@ -403,10 +419,9 @@ class creationWindow(QDialog):
             with open('data/studentInfo.json', 'w') as writeStudent:
                 json.dump(data, writeStudent, indent=2)
 
-            print('Created new student')
+            messageBox('Creation Status', f'Created new student\n{studentName}').exec()
         else:
             raise 'somethings very wrong'
-        pass
 
 
 class LoginWindow(QMainWindow):
@@ -414,6 +429,7 @@ class LoginWindow(QMainWindow):
         QMainWindow.__init__(self, parent)
         self.ui = uic.loadUi('ui/loginPanel.ui', self)
         self.ui.submitBTN.clicked.connect(lambda: self.login())
+        self.ui.passwordINPUT.setEchoMode(QLineEdit.EchoMode.Password)
 
     def login(self):
         with open('data/loginInfo.json', 'r') as loginJSON:
@@ -422,19 +438,18 @@ class LoginWindow(QMainWindow):
         loginTeach = self.ui.teacherCodeINPUT.text()
         loginPass = self.ui.passwordINPUT.text()
         hashedPass = hashText(loginPass)
-        try:
-            for teacher in data['teachers']:
-                if teacher['name'] == loginTeach:  # NAMES ARE TREATED AS UNIQUE
-                    if teacher['password'] == hashedPass:
-                        print('Correct password')
-                        setActiveTeacher(loginTeach)
-                        mainPanel = MainWindow()
-                        mainPanel.show()
-                        self.close()
-                    else:
-                        print('Incorrect password')
-        except KeyError:
-            print('User does not exist')
+        for teacher in data['teachers']:
+            if teacher['name'] == loginTeach:  # NAMES ARE TREATED AS UNIQUE
+                if teacher['password'] == hashedPass:
+                    setActiveTeacher(loginTeach)
+                    mainPanel = MainWindow()
+                    mainPanel.show()
+                    self.close()
+                    messageBox('Login Status', 'Successful').exec()
+                else:
+                    messageBox('Login Status', 'Failed').exec()
+        if getActiveTeacher() is None:
+            messageBox('Login Status', 'Failed').exec()
 
 
 def main():
