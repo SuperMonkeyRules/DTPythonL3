@@ -3,9 +3,9 @@ import json
 import sys
 
 from PyQt6 import uic
-from PyQt6.QtCore import Qt, QRect, QPoint
-from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QAbstractItemView, QDialog, QMessageBox, \
-    QLineEdit, QMessageBox, QLabel
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QAbstractItemView, QDialog, QLineEdit, \
+    QMessageBox
 
 activeTeacher = None
 
@@ -42,6 +42,7 @@ def getActiveTeacher():
 class messageBox(QMessageBox):
     """
     An easily adjustable message box.
+
     :param title: Title of the message box
     :param text: Text of the message box
     """
@@ -111,7 +112,8 @@ class MainWindow(QMainWindow):
 
 class gradeManager(QMainWindow):
     """
-
+    Manages the grade management window,
+    The grade management window contains multiple dropdowns for marking a student.
     """
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
@@ -129,6 +131,10 @@ class gradeManager(QMainWindow):
         Update or Add new grade.
         """
         success = False
+        paperID = None
+        studentID = None
+        teacherID = None
+
         # Open all files
         with open('data/gradesInfo.json', 'r') as gradesJSON:
             gradesData = dict(json.load(gradesJSON))
@@ -160,6 +166,9 @@ class gradeManager(QMainWindow):
                 paperID = paperInfo['id']
                 break
 
+        if None in [studentID, teacherID, paperID]:
+            return
+
         changeType = ''
         # Find the grade to be updated
         for gradeInfo in gradesData['grades']:
@@ -182,10 +191,7 @@ class gradeManager(QMainWindow):
         with open('data/gradesInfo.json', 'w') as writeGrades:
             json.dump(gradesData, writeGrades, indent=2)
 
-        msg = QMessageBox()
-        msg.setText(f'Successfully {changeType}')
-        msg.setWindowTitle('Successful')
-        msg.exec()
+        messageBox('Marking Status', f'Successfully {changeType}').exec()
 
 
     def populateStudents(self):
@@ -328,6 +334,9 @@ class PaperWindow(QMainWindow):
             teacherData = dict(json.load(teacherJSON))
 
         gradeData = []
+        selID = None
+        studentName = None
+        teacherName = None
         for grade in gradesData['grades']:
             for paper in paperData['papers']:
                 if paper['name'] == self.chosenPaper:
@@ -425,6 +434,12 @@ class creationWindow(QDialog):
 
 
 class LoginWindow(QMainWindow):
+    """
+    The login window,
+    The login window shows immediately when the program is run
+    and contains two text boxes and a button.
+    Hashing is used for the passwords.
+    """
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         self.ui = uic.loadUi('ui/loginPanel.ui', self)

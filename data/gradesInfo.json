@@ -179,6 +179,24 @@
       "paper_id": 2,
       "grade": "B+",
       "teacher_id": 0
+    },
+    {
+      "student_id": 0,
+      "paper_id": 6,
+      "grade": "A-",
+      "teacher_id": 0
+    },
+    {
+      "student_id": 5,
+      "paper_id": 6,
+      "grade": "B",
+      "teacher_id": 0
+    },
+    {
+      "student_id": 2,
+      "paper_id": 6,
+      "grade": "A",
+      "teacher_id": 0
     }
   ]
 }
