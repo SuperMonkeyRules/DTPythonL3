@@ -167,6 +167,7 @@ class gradeManager(QMainWindow):
                 break
 
         if None in [studentID, teacherID, paperID]:
+            messageBox('Marking Status', "Couldn't find one of:\nStudent,\nTeacher,\nPaper").exec()
             return
 
         changeType = ''
