@@ -93,7 +93,6 @@ class MainWindow(QMainWindow):
         self.ui.createPaperBTN.clicked.connect(lambda: createNew('paper'))
         self.ui.viewStudentsBTN.clicked.connect(lambda: viewAllStudents())
         self.ui.markStudentBTN.clicked.connect(lambda: openGradeManager())
-        self.ui.paperCOMBO.activated.connect(lambda: self.populatePapers())
 
 
     def populatePapers(self):
