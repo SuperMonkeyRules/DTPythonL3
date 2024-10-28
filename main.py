@@ -5,7 +5,7 @@ import sys
 from PyQt6 import uic
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QAbstractItemView, QDialog, QLineEdit, \
-    QMessageBox
+    QMessageBox, QComboBox
 
 activeTeacher = None
 
@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
 
             :param creationType:
             """
-            creationType = creationWindow(creationType)
+            creationType = creationWindow(creationType, self)
             creationType.show()
 
         def viewAllStudents():
@@ -93,13 +93,16 @@ class MainWindow(QMainWindow):
         self.ui.createPaperBTN.clicked.connect(lambda: createNew('paper'))
         self.ui.viewStudentsBTN.clicked.connect(lambda: viewAllStudents())
         self.ui.markStudentBTN.clicked.connect(lambda: openGradeManager())
+        self.ui.paperCOMBO.activated.connect(lambda: self.populatePapers())
 
 
     def populatePapers(self):
         """
         Populates the papers dropdown with papers from the stored JSON
         """
-        print('clicked')
+        # Clear all papers
+        self.ui.paperCOMBO.clear()
+
         # Get all papers
         with open('data/paperInfo.json', 'r') as paperJSON:
             data = dict(json.load(paperJSON))
