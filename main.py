@@ -62,6 +62,7 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self, parent)
         self.ui = uic.loadUi('ui/mainPanel.ui', self)
         self.ui.activeTeachLABEL.setText(f'Teacher: {getActiveTeacher()}')
+        self.populatePapers()
 
         def createNew(creationType: str):
             """
@@ -93,6 +94,12 @@ class MainWindow(QMainWindow):
         self.ui.viewStudentsBTN.clicked.connect(lambda: viewAllStudents())
         self.ui.markStudentBTN.clicked.connect(lambda: openGradeManager())
 
+
+    def populatePapers(self):
+        """
+        Populates the papers dropdown with papers from the stored JSON
+        """
+        print('clicked')
         # Get all papers
         with open('data/paperInfo.json', 'r') as paperJSON:
             data = dict(json.load(paperJSON))
